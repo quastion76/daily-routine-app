@@ -20,8 +20,29 @@ let currentUser = null;
 // 인증 관리
 // ========================================
 
+// 연결 상태 테스트
+async function testNetwork() {
+    logToScreen('📡 네트워크 연결 확인 중...', 'info');
+    try {
+        // Supabase Health Check (또는 가벼운 요청)
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+            method: 'HEAD',
+            headers: { 'apikey': SUPABASE_ANON_KEY }
+        });
+        logToScreen(`✅ 서버 연결 확인됨 (Status: ${res.status})`, 'success');
+        return true;
+    } catch (e) {
+        logToScreen(`❌ 서버 연결 불가: ${e.message}`, 'error');
+        logToScreen('💡 힌트: Supabase > Authentication > URL Config > Redirect URLs 설정을 확인하세요.', 'error');
+        return false;
+    }
+}
+
 async function initAuth() {
     logToScreen('🔐 인증 초기화 시작...');
+
+    // 네트워크 사전 점검
+    await testNetwork();
 
     // 1. 현재 세션 확인
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
