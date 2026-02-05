@@ -1,14 +1,15 @@
 // Supabase 설정 및 초기화
-const REAL_SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
-// 로컬호스트가 아니면 Vercel Proxy 사용
-const SUPABASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? REAL_SUPABASE_URL
-    : (window.location.origin + '/supa-proxy');
-
+const SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zanN6ZndnZ3V5eWpldWhxbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTc5MjAsImV4cCI6MjA4NTgzMzkyMH0.VMAaiLIiaEwFDPKI94Xp2PAY3XZCz8OMr9Ovy0hzfro';
 
-// Supabase 클라이언트 생성 (변수명 충돌 방지: supabase -> supabaseClient)
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase 클라이언트 생성 (옵션 추가: 세션 지속성 및 자동 갱신)
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false
+    }
+});
 
 // 자동 로그인 정보
 const AUTO_LOGIN = {
@@ -25,32 +26,41 @@ let currentUser = null;
 // 인증 관리
 // ========================================
 
-// 연결 상태 테스트
+// 연결 상태 정밀 진단
 async function testNetwork() {
-    logToScreen('📡 네트워크 연결 확인 중...', 'info');
-    logToScreen(`ℹ️ Target URL: ${SUPABASE_URL}`, 'info');
+    logToScreen('📡 네트워크 정밀 진단 중...', 'info');
+    logToScreen(`ℹ️ Target: ${SUPABASE_URL}`, 'info');
 
     try {
-        // Supabase Health Check
+        // 1. 일반 요청 (CORS, apikey 포함)
         const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
             method: 'HEAD',
             headers: { 'apikey': SUPABASE_ANON_KEY }
         });
 
         if (res.ok) {
-            logToScreen(`✅ 서버 연결 확인됨 (Status: ${res.status})`, 'success');
+            logToScreen(`✅ 정상 연결 확인 (Status: ${res.status})`, 'success');
             return true;
         } else {
-            logToScreen(`⚠️ 서버 응답 이상 (Status: ${res.status})`, 'error');
-            // 프록시 실패 시 원본 URL로 재시도 (Fallback)
-            if (SUPABASE_URL !== REAL_SUPABASE_URL) {
-                logToScreen('🔄 원본 URL로 재시도...', 'info');
-                // 여기선 testNetwork만 하고 실제 클라이언트는 못 바꿈 (새로고침 필요할수도)
-            }
+            logToScreen(`⚠️ 서버 응답 코드: ${res.status}`, 'error');
             return false;
         }
     } catch (e) {
-        logToScreen(`❌ 서버 연결 불가: ${e.message}`, 'error');
+        logToScreen(`❌ 일반 연결 실패: ${e.message}`, 'error');
+
+        // 2. no-cors 요청 (CORS 무시하고 연결만 확인)
+        logToScreen('🕵️ CORS 문제인지 확인 중...', 'info');
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                method: 'HEAD',
+                mode: 'no-cors' // 응답은 못 읽지만 연결 여부는 확인 가능
+            });
+            logToScreen('🚨 네트워크는 연결되지만 보안(CORS)에 막혔습니다!', 'error');
+            logToScreen('👉 해결책: Supabase 대시보드에서 CORS 설정을 확인해야 합니다.', 'info');
+        } catch (e2) {
+            logToScreen(`☠️ 완전히 연결할 수 없습니다: ${e2.message}`, 'error');
+            logToScreen('인터넷 연결이나 방화벽을 확인해주세요.', 'error');
+        }
         return false;
     }
 }
@@ -88,7 +98,7 @@ async function initAuth() {
     if (error) {
         logToScreen('❌ 로그인 실패: ' + error.message, 'error');
         logToScreen('⚠️ 데이터 동기화가 작동하지 않습니다.', 'error');
-        alert('로그인에 실패했습니다. 디버그 콘솔을 확인해주세요.');
+        // alert('로그인에 실패했습니다. 디버그 콘솔을 확인해주세요.'); // 너무 잦은 알림 방지
         return;
     }
 
