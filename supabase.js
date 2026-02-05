@@ -14,20 +14,9 @@ const AUTO_LOGIN = {
 // 현재 사용자
 let currentUser = null;
 
-// 디버그 로그 함수
-function logToScreen(msg, type = 'info') {
-    const consoleDiv = document.getElementById('debug-console');
-    if (consoleDiv) {
-        const line = document.createElement('div');
-        const time = new Date().toLocaleTimeString();
-        line.textContent = `[${time}] ${msg}`;
-        if (type === 'error') line.style.color = '#ff6b6b';
-        if (type === 'success') line.style.color = '#69db7c';
-        consoleDiv.appendChild(line);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
-    console.log(msg);
-}
+// window.logToScreen 사용 (index.html에 정의됨)
+
+// ========================================
 
 // ========================================
 // 인증 관리
