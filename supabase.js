@@ -1,5 +1,6 @@
 // Supabase 설정 및 초기화
-const SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
+// 사용자가 제공한 올바른 정보 적용 (2026-02-05)
+const SUPABASE_URL = 'https://osjszfwgguyyjeuhqlor.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zanN6ZndnZ3V5eWpldWhxbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTc5MjAsImV4cCI6MjA4NTgzMzkyMH0.VMAaiLIiaEwFDPKI94Xp2PAY3XZCz8OMr9Ovy0hzfro';
 
 // Supabase 클라이언트 생성 (옵션 추가: 세션 지속성 및 자동 갱신)
@@ -43,7 +44,8 @@ async function testNetwork() {
             return true;
         } else {
             logToScreen(`⚠️ 서버 응답 코드: ${res.status}`, 'error');
-            return false;
+            // 400번대 에러라도 서버가 응답했으면 연결은 성공한 것임
+            return true;
         }
     } catch (e) {
         logToScreen(`❌ 일반 연결 실패: ${e.message}`, 'error');
@@ -98,7 +100,6 @@ async function initAuth() {
     if (error) {
         logToScreen('❌ 로그인 실패: ' + error.message, 'error');
         logToScreen('⚠️ 데이터 동기화가 작동하지 않습니다.', 'error');
-        // alert('로그인에 실패했습니다. 디버그 콘솔을 확인해주세요.'); // 너무 잦은 알림 방지
         return;
     }
 
