@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일일 루틴 & 할일 관리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>▸ 나의 할일 관리</h1>
+            <p class="subtitle">일일 루틴 & 할일을 체계적으로 관리하세요</p>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="routine">
+                <span class="tab-icon">☰</span>
+                <span class="tab-text">일일 루틴</span>
+            </button>
+            <button class="tab-btn" data-tab="todo">
+                <span class="tab-icon">✓</span>
+                <span class="tab-text">해야할 일</span>
+            </button>
+        </div>
+
+        <!-- 일일 루틴 탭 콘텐츠 -->
+        <div class="tab-content active" id="routineTab">
+            <div class="routine-header">
+                <h2>☰ 일일 루틴</h2>
+                <button class="add-routine-btn" id="addRoutineBtn" aria-label="루틴 추가">
+                    <span>+</span> 루틴 추가
+                </button>
+            </div>
+
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span class="progress-label">오늘의 진행률</span>
+                    <span class="progress-percentage" id="progressPercentage">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="completedCount">0</span> / <span id="totalCount">0</span> 완료
+                </div>
+            </div>
+
+            <div class="checklist-container" id="routineList">
+                <div class="checklist-item" data-id="recycle">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="recycle">
+                        <label for="recycle">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>재활용품 수거</strong>
+                                <small>협곡길(1), 거점지역(3), 아부레이 채석장(1), 오리지늄 연구구역(2), 광맥구역(2), 에너지 공급 고지(2)</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="mutcoin">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="mutcoin">
+                        <label for="mutcoin">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>무트코인 (거래소)</strong>
+                                <small>시세 확인 후 유리한 품목 매매 (루틴 최우선)</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="logistics">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="logistics">
+                        <label for="logistics">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>딸배 (물류 운송)</strong>
+                                <small>사명 '위탁' 돌려놓기</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="sanity">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="sanity">
+                        <label for="sanity">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>이성 빼기</strong>
+                                <small>에너지 풀 차기 전에 소모</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="subbase">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="subbase">
+                        <label for="subbase">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>서브거점 관리</strong>
+                                <small>생산 물품 단순 '납품' 및 수거</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="steel">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="steel">
+                        <label for="steel">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>제강호 시설 관리</strong>
+                                <small>제강호 업그레이드 및 생산 대기열 확인</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="rare">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="rare">
+                        <label for="rare">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>희귀 자원 채집</strong>
+                                <small>리젠된 희귀 재료 포인트 파밍</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-id="gift">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="gift">
+                        <label for="gift">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>선물로 신뢰도 올리기</strong>
+                                <small>오퍼레이터별 선호 선물 전달 및 신뢰도 관리</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification-card">
+                <button id="enableNotifications" class="notification-btn">♪ 알림 권한 허용하기</button>
+                <p class="notification-status" id="notificationStatus">알림을 받으려면 권한을 허용해주세요</p>
+            </div>
+
+            <div class="info-card">
+                <p>• <strong>자동 초기화:</strong> 매일 오전 5시에 체크리스트가 자동으로 초기화됩니다</p>
+                <p>• <strong>미완료 알림:</strong> 매일 밤 12시에 완료하지 못한 항목이 있으면 알림을 보냅니다</p>
+            </div>
+        </div>
+
+        <!-- 해야할 일 탭 콘텐츠 -->
+        <div class="tab-content" id="todoTab">
+            <div class="todo-header">
+                <h2>해야할 일</h2>
+                <div class="todo-header-actions">
+                    <button class="trash-btn" id="trashBtn" aria-label="휴지통 열기">
+                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                    <button class="add-todo-btn" id="addTodoBtn" aria-label="할일 추가">
+                        <span>+</span> 할일 추가
+                    </button>
+                </div>
+            </div>
+
+            <div class="todo-list" id="todoList">
+                <!-- 할일 항목들이 여기에 동적으로 추가됩니다 -->
+                <div class="empty-state">
+                    <p>∅ 아직 등록된 할일이 없어요</p>
+                    <p class="empty-state-subtitle">위의 "할일 추가" 버튼을 눌러 새로운 할일을 추가해보세요</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 할일 추가/수정 모달 -->
+    <div class="modal" id="todoModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">+ 새 할일 추가</h3>
+                <button class="modal-close" id="modalClose" aria-label="모달 닫기">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="todoForm">
+                    <div class="form-group">
+                        <label for="todoTitle">할일 이름 *</label>
+                        <input type="text" id="todoTitle" placeholder="예: 프로젝트 보고서 작성" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="todoDescription">세부 설명</label>
+                        <textarea id="todoDescription" placeholder="할일에 대한 상세한 설명을 입력하세요" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="todoDueDate">마감일</label>
+                        <input type="date" id="todoDueDate">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">취소</button>
+                        <button type="submit" class="btn-submit" id="submitBtn">추가하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 루틴 추가/수정 모달 -->
+    <div class="modal" id="routineModal" role="dialog" aria-labelledby="routineModalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="routineModalTitle">+ 새 루틴 추가</h3>
+                <button class="modal-close" id="routineModalClose" aria-label="모달 닫기">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="routineForm">
+                    <div class="form-group">
+                        <label for="routineTitle">루틴 이름 *</label>
+                        <input type="text" id="routineTitle" placeholder="예: 아침 운동하기" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="routineDescription">세부 설명</label>
+                        <textarea id="routineDescription" placeholder="루틴에 대한 상세한 설명을 입력하세요" rows="3"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="routineCancelBtn">취소</button>
+                        <button type="submit" class="btn-submit" id="routineSubmitBtn">추가하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 휴지통 모달 -->
+    <div class="modal" id="trashModal" role="dialog" aria-labelledby="trashModalTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="trashModalTitle">⊗ 휴지통</h3>
+                <button class="modal-close" id="trashModalClose" aria-label="모달 닫기">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="trash-actions">
+                    <button class="btn-danger" id="emptyTrashBtn">전체 비우기</button>
+                </div>
+                <div class="trash-list" id="trashList">
+                    <!-- 휴지통 항목들이 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase 설정 및 함수 -->
+    <script src="supabase.js"></script>
+    <!-- 앱 로직 -->
+    <script src="app.js"></script>
+</body>
+
+</html>

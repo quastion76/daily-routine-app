@@ -1,0 +1,21 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+.npm
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Vercel
+.vercel
