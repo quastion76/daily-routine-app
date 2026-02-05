@@ -5,16 +5,16 @@
 const RESET_HOUR = 5; // 오전 5시
 const NOTIFICATION_HOUR = 0; // 밤 12시
 
-// 일일 루틴 데이터
-let routines = [];
+// 일일 루틴 데이터 (window.routines 사용)
+// let routines = [];
 let editingRoutineId = null;
 
-// 할일 데이터
-let todos = [];
+// 할일 데이터 (window.todos 사용)
+// let todos = [];
 let editingTodoId = null;
 
-// 휴지통 데이터
-let trash = [];
+// 휴지통 데이터 (window.trash 사용)
+// let trash = [];
 
 // DOM 요소
 let routineList;
