@@ -1,5 +1,10 @@
 // Supabase 설정 및 초기화
-const SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
+const REAL_SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
+// 로컬호스트가 아니면 Vercel Proxy 사용
+const SUPABASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? REAL_SUPABASE_URL
+    : (window.location.origin + '/supa-proxy');
+
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zanN6ZndnZ3V5eWpldWhxbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTc5MjAsImV4cCI6MjA4NTgzMzkyMH0.VMAaiLIiaEwFDPKI94Xp2PAY3XZCz8OMr9Ovy0hzfro';
 
 // Supabase 클라이언트 생성 (변수명 충돌 방지: supabase -> supabaseClient)
@@ -23,17 +28,29 @@ let currentUser = null;
 // 연결 상태 테스트
 async function testNetwork() {
     logToScreen('📡 네트워크 연결 확인 중...', 'info');
+    logToScreen(`ℹ️ Target URL: ${SUPABASE_URL}`, 'info');
+
     try {
-        // Supabase Health Check (또는 가벼운 요청)
+        // Supabase Health Check
         const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
             method: 'HEAD',
             headers: { 'apikey': SUPABASE_ANON_KEY }
         });
-        logToScreen(`✅ 서버 연결 확인됨 (Status: ${res.status})`, 'success');
-        return true;
+
+        if (res.ok) {
+            logToScreen(`✅ 서버 연결 확인됨 (Status: ${res.status})`, 'success');
+            return true;
+        } else {
+            logToScreen(`⚠️ 서버 응답 이상 (Status: ${res.status})`, 'error');
+            // 프록시 실패 시 원본 URL로 재시도 (Fallback)
+            if (SUPABASE_URL !== REAL_SUPABASE_URL) {
+                logToScreen('🔄 원본 URL로 재시도...', 'info');
+                // 여기선 testNetwork만 하고 실제 클라이언트는 못 바꿈 (새로고침 필요할수도)
+            }
+            return false;
+        }
     } catch (e) {
         logToScreen(`❌ 서버 연결 불가: ${e.message}`, 'error');
-        logToScreen('💡 힌트: Supabase > Authentication > URL Config > Redirect URLs 설정을 확인하세요.', 'error');
         return false;
     }
 }

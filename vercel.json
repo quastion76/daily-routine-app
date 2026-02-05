@@ -11,5 +11,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/supa-proxy/:match*",
+      "destination": "https://osjszfwgguyyjeuhlor.supabase.co/:match*"
+    }
   ]
 }
