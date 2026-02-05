@@ -3,7 +3,7 @@
 const SUPABASE_URL = 'https://osjszfwgguyyjeuhqlor.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zanN6ZndnZ3V5eWpldWhxbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTc5MjAsImV4cCI6MjA4NTgzMzkyMH0.VMAaiLIiaEwFDPKI94Xp2PAY3XZCz8OMr9Ovy0hzfro';
 
-// Supabase 클라이언트 생성 (옵션 추가: 세션 지속성 및 자동 갱신)
+// Supabase 클라이언트 생성
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
         persistSession: true,
@@ -21,76 +21,30 @@ const AUTO_LOGIN = {
 // 현재 사용자
 let currentUser = null;
 
-// window.logToScreen 사용 (index.html에 정의됨)
-
 // ========================================
 // 인증 관리
 // ========================================
 
-// 연결 상태 정밀 진단
-async function testNetwork() {
-    logToScreen('📡 네트워크 정밀 진단 중...', 'info');
-    logToScreen(`ℹ️ Target: ${SUPABASE_URL}`, 'info');
-
-    try {
-        // 1. 일반 요청 (CORS, apikey 포함)
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-            method: 'HEAD',
-            headers: { 'apikey': SUPABASE_ANON_KEY }
-        });
-
-        if (res.ok) {
-            logToScreen(`✅ 정상 연결 확인 (Status: ${res.status})`, 'success');
-            return true;
-        } else {
-            logToScreen(`⚠️ 서버 응답 코드: ${res.status}`, 'error');
-            // 400번대 에러라도 서버가 응답했으면 연결은 성공한 것임
-            return true;
-        }
-    } catch (e) {
-        logToScreen(`❌ 일반 연결 실패: ${e.message}`, 'error');
-
-        // 2. no-cors 요청 (CORS 무시하고 연결만 확인)
-        logToScreen('🕵️ CORS 문제인지 확인 중...', 'info');
-        try {
-            await fetch(`${SUPABASE_URL}/rest/v1/`, {
-                method: 'HEAD',
-                mode: 'no-cors' // 응답은 못 읽지만 연결 여부는 확인 가능
-            });
-            logToScreen('🚨 네트워크는 연결되지만 보안(CORS)에 막혔습니다!', 'error');
-            logToScreen('👉 해결책: Supabase 대시보드에서 CORS 설정을 확인해야 합니다.', 'info');
-        } catch (e2) {
-            logToScreen(`☠️ 완전히 연결할 수 없습니다: ${e2.message}`, 'error');
-            logToScreen('인터넷 연결이나 방화벽을 확인해주세요.', 'error');
-        }
-        return false;
-    }
-}
-
 async function initAuth() {
-    logToScreen('🔐 인증 초기화 시작...');
-
-    // 네트워크 사전 점검
-    await testNetwork();
+    console.log('🔐 인증 초기화 시작...');
 
     // 1. 현재 세션 확인
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
     if (sessionError) {
-        logToScreen('❌ 세션 확인 에러: ' + sessionError.message, 'error');
+        console.error('❌ 세션 확인 에러: ' + sessionError.message);
     }
 
     if (session) {
-        logToScreen('✅ 기존 세션 발견', 'success');
-        logToScreen('👤 User ID: ' + session.user.id);
+        console.log('✅ 기존 세션 발견');
+        console.log('👤 User ID: ' + session.user.id);
         currentUser = session.user;
         await loadAllData();
         return;
     }
 
     // 2. 자동 로그인 시도
-    logToScreen('🔑 자동 로그인 시도 중...');
-    logToScreen(`📧 Email: ${AUTO_LOGIN.email.substring(0, 3)}***@***`); // 이메일 일부만 노출
+    console.log('🔑 자동 로그인 시도 중...');
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: AUTO_LOGIN.email,
@@ -98,14 +52,13 @@ async function initAuth() {
     });
 
     if (error) {
-        logToScreen('❌ 로그인 실패: ' + error.message, 'error');
-        logToScreen('⚠️ 데이터 동기화가 작동하지 않습니다.', 'error');
+        console.error('❌ 로그인 실패: ' + error.message);
+        console.warn('⚠️ 데이터 동기화가 작동하지 않습니다.');
         return;
     }
 
-    logToScreen('✅ 로그인 성공!', 'success');
-    logToScreen('👤 User ID: ' + data.user.id);
-    logToScreen('✨ 데이터 공유가 활성화되었습니다.', 'success');
+    console.log('✅ 로그인 성공!');
+    console.log('👤 User ID: ' + data.user.id);
 
     currentUser = data.user;
     await loadAllData();
@@ -113,16 +66,16 @@ async function initAuth() {
 
 // 모든 데이터 로드
 async function loadAllData() {
-    logToScreen('📥 데이터 로딩 중...');
+    console.log('📥 데이터 로딩 중...');
     try {
         await Promise.all([
             loadRoutinesFromSupabase(),
             loadTodosFromSupabase(),
             loadTrashFromSupabase()
         ]);
-        logToScreen('✅ 모든 초기 데이터 로드 완료', 'success');
+        console.log('✅ 모든 초기 데이터 로드 완료');
     } catch (e) {
-        logToScreen('❌ 데이터 로드 중 에러 발생: ' + e.message, 'error');
+        console.error('❌ 데이터 로드 중 에러 발생: ' + e.message);
     }
 }
 
