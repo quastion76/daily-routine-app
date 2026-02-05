@@ -204,13 +204,16 @@ async function loadTodosFromSupabase() {
 }
 
 async function saveTodoToSupabase(todo) {
+    // 날짜가 빈 문자열이면 null로 변환하여 전송
+    const dueDate = (todo.due_date || todo.dueDate) ? (todo.due_date || todo.dueDate) : null;
+
     const { data, error } = await supabaseClient
         .from('todos')
         .insert([{
             user_id: currentUser.id,
             title: todo.title,
             description: todo.description,
-            due_date: todo.due_date || todo.dueDate, // 필드명 호환성
+            due_date: dueDate,
             completed: todo.completed,
             priority: todo.priority || 0
         }])
@@ -293,6 +296,9 @@ async function deleteTrashItemFromSupabase(id) {
         console.error('휴지통 항목 삭제 실패:', error);
         throw error;
     }
+
+    // 삭제 후 목록 즉시 갱신
+    await loadTrashFromSupabase();
 }
 
 async function emptyTrashSupabase() {
@@ -305,6 +311,9 @@ async function emptyTrashSupabase() {
         console.error('휴지통 비우기 실패:', error);
         throw error;
     }
+
+    // 비우기 후 목록 즉시 갱신
+    await loadTrashFromSupabase();
 }
 
 // ========================================
