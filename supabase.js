@@ -2,8 +2,8 @@
 const SUPABASE_URL = 'https://osjszfwgguyyjeuhlor.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zanN6ZndnZ3V5eWpldWhxbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTc5MjAsImV4cCI6MjA4NTgzMzkyMH0.VMAaiLIiaEwFDPKI94Xp2PAY3XZCz8OMr9Ovy0hzfro';
 
-// Supabase 클라이언트 생성
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase 클라이언트 생성 (변수명 충돌 방지: supabase -> supabaseClient)
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // 자동 로그인 정보
 const AUTO_LOGIN = {
@@ -17,8 +17,6 @@ let currentUser = null;
 // window.logToScreen 사용 (index.html에 정의됨)
 
 // ========================================
-
-// ========================================
 // 인증 관리
 // ========================================
 
@@ -26,7 +24,7 @@ async function initAuth() {
     logToScreen('🔐 인증 초기화 시작...');
 
     // 1. 현재 세션 확인
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
     if (sessionError) {
         logToScreen('❌ 세션 확인 에러: ' + sessionError.message, 'error');
@@ -44,7 +42,7 @@ async function initAuth() {
     logToScreen('🔑 자동 로그인 시도 중...');
     logToScreen(`📧 Email: ${AUTO_LOGIN.email.substring(0, 3)}***@***`); // 이메일 일부만 노출
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: AUTO_LOGIN.email,
         password: AUTO_LOGIN.password
     });
@@ -84,7 +82,7 @@ async function loadAllData() {
 // ========================================
 
 async function loadRoutinesFromSupabase() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('routines')
         .select('*')
         .order('created_at', { ascending: true });
@@ -99,7 +97,7 @@ async function loadRoutinesFromSupabase() {
 }
 
 async function saveRoutineToSupabase(routine) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('routines')
         .insert([{
             user_id: currentUser.id,
@@ -119,7 +117,7 @@ async function saveRoutineToSupabase(routine) {
 }
 
 async function updateRoutineInSupabase(id, updates) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('routines')
         .update(updates)
         .eq('id', id);
@@ -131,7 +129,7 @@ async function updateRoutineInSupabase(id, updates) {
 }
 
 async function deleteRoutineFromSupabase(id) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('routines')
         .delete()
         .eq('id', id);
@@ -147,7 +145,7 @@ async function deleteRoutineFromSupabase(id) {
 // ========================================
 
 async function loadTodosFromSupabase() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('todos')
         .select('*')
         .order('priority', { ascending: true });
@@ -162,13 +160,13 @@ async function loadTodosFromSupabase() {
 }
 
 async function saveTodoToSupabase(todo) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('todos')
         .insert([{
             user_id: currentUser.id,
             title: todo.title,
             description: todo.description,
-            due_date: todo.dueDate,
+            due_date: todo.due_date || todo.dueDate, // 필드명 호환성
             completed: todo.completed,
             priority: todo.priority || 0
         }])
@@ -184,7 +182,7 @@ async function saveTodoToSupabase(todo) {
 }
 
 async function updateTodoInSupabase(id, updates) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('todos')
         .update(updates)
         .eq('id', id);
@@ -196,7 +194,7 @@ async function updateTodoInSupabase(id, updates) {
 }
 
 async function deleteTodoFromSupabase(id) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('todos')
         .delete()
         .eq('id', id);
@@ -212,7 +210,7 @@ async function deleteTodoFromSupabase(id) {
 // ========================================
 
 async function loadTrashFromSupabase() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('trash')
         .select('*')
         .order('deleted_at', { ascending: false });
@@ -226,7 +224,7 @@ async function loadTrashFromSupabase() {
 }
 
 async function moveToTrashSupabase(item, type) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('trash')
         .insert([{
             user_id: currentUser.id,
@@ -242,7 +240,7 @@ async function moveToTrashSupabase(item, type) {
 }
 
 async function deleteTrashItemFromSupabase(id) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('trash')
         .delete()
         .eq('id', id);
@@ -254,7 +252,7 @@ async function deleteTrashItemFromSupabase(id) {
 }
 
 async function emptyTrashSupabase() {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('trash')
         .delete()
         .eq('user_id', currentUser.id);
@@ -271,7 +269,7 @@ async function emptyTrashSupabase() {
 
 function setupRealtimeSubscriptions() {
     // Routines 실시간 구독
-    supabase
+    supabaseClient
         .channel('routines-changes')
         .on('postgres_changes',
             { event: '*', schema: 'public', table: 'routines' },
@@ -283,7 +281,7 @@ function setupRealtimeSubscriptions() {
         .subscribe();
 
     // Todos 실시간 구독
-    supabase
+    supabaseClient
         .channel('todos-changes')
         .on('postgres_changes',
             { event: '*', schema: 'public', table: 'todos' },
