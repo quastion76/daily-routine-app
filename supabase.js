@@ -83,6 +83,18 @@ async function loadAllData() {
 // Routines CRUD (Supabase)
 // ========================================
 
+// 기본 루틴 데이터
+const DEFAULT_ROUTINES = [
+    { title: '재활용품 수거', description: '협곡길(1), 거점지역(3), 아부레이 채석장(1), 오리지늄 연구구역(2), 광맥구역(2), 에너지 공급 고지(2)' },
+    { title: '무트코인 (거래소)', description: '시세 확인 후 유리한 품목 매매 (루틴 최우선)' },
+    { title: '딸배 (물류 운송)', description: '사명 위탁 돌려놓기' },
+    { title: '이성 빼기', description: '에너지 풀 차기 전에 소모' },
+    { title: '서브거점 관리', description: '생산 물품 단순 납품 및 수거' },
+    { title: '제강호 시설 관리', description: '제강호 업그레이드 및 생산 대기열 확인' },
+    { title: '희귀 자원 채집', description: '리젠된 희귀 재료 포인트 파밍' },
+    { title: '선물로 신뢰도 올리기', description: '오퍼레이터별 선호 선물 전달 및 신뢰도 관리' }
+];
+
 async function loadRoutinesFromSupabase() {
     const { data, error } = await supabaseClient
         .from('routines')
@@ -94,8 +106,38 @@ async function loadRoutinesFromSupabase() {
         return;
     }
 
-    routines = data || [];
-    renderRoutines();
+    // 데이터가 하나도 없으면 기본 루틴 추가 (Seeding)
+    if (!data || data.length === 0) {
+        console.log('✨ 기본 루틴 데이터 초기화 중...');
+        await seedDefaultRoutines();
+    } else {
+        routines = data;
+        renderRoutines();
+    }
+}
+
+async function seedDefaultRoutines() {
+    if (!currentUser) return;
+
+    const inserts = DEFAULT_ROUTINES.map(r => ({
+        user_id: currentUser.id,
+        title: r.title,
+        description: r.description,
+        completed: false
+    }));
+
+    const { data, error } = await supabaseClient
+        .from('routines')
+        .insert(inserts)
+        .select();
+
+    if (error) {
+        console.error('기본 루틴 추가 실패:', error);
+    } else {
+        console.log('✅ 기본 루틴 추가 완료:', data);
+        routines = data;
+        renderRoutines();
+    }
 }
 
 async function saveRoutineToSupabase(routine) {
