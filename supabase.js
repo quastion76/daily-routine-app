@@ -14,50 +14,80 @@ const AUTO_LOGIN = {
 // 현재 사용자
 let currentUser = null;
 
+// 디버그 로그 함수
+function logToScreen(msg, type = 'info') {
+    const consoleDiv = document.getElementById('debug-console');
+    if (consoleDiv) {
+        const line = document.createElement('div');
+        const time = new Date().toLocaleTimeString();
+        line.textContent = `[${time}] ${msg}`;
+        if (type === 'error') line.style.color = '#ff6b6b';
+        if (type === 'success') line.style.color = '#69db7c';
+        consoleDiv.appendChild(line);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+    console.log(msg);
+}
+
 // ========================================
 // 인증 관리
 // ========================================
 
 async function initAuth() {
-    console.log('🔐 인증 초기화 중...');
+    logToScreen('🔐 인증 초기화 시작...');
 
     // 1. 현재 세션 확인
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+        logToScreen('❌ 세션 확인 에러: ' + sessionError.message, 'error');
+    }
 
     if (session) {
-        console.log('✅ 기존 세션 발견');
+        logToScreen('✅ 기존 세션 발견', 'success');
+        logToScreen('👤 User ID: ' + session.user.id);
         currentUser = session.user;
         await loadAllData();
         return;
     }
 
     // 2. 자동 로그인 시도
-    console.log('🔑 자동 로그인 시도 중...');
+    logToScreen('🔑 자동 로그인 시도 중...');
+    logToScreen(`📧 Email: ${AUTO_LOGIN.email.substring(0, 3)}***@***`); // 이메일 일부만 노출
+
     const { data, error } = await supabase.auth.signInWithPassword({
         email: AUTO_LOGIN.email,
         password: AUTO_LOGIN.password
     });
 
     if (error) {
-        console.error('❌ 로그인 실패:', error.message);
-        alert('로그인에 실패했습니다. 네트워크 연결을 확인해주세요.');
+        logToScreen('❌ 로그인 실패: ' + error.message, 'error');
+        logToScreen('⚠️ 데이터 동기화가 작동하지 않습니다.', 'error');
+        alert('로그인에 실패했습니다. 디버그 콘솔을 확인해주세요.');
         return;
     }
 
-    console.log('✅ 로그인 성공');
+    logToScreen('✅ 로그인 성공!', 'success');
+    logToScreen('👤 User ID: ' + data.user.id);
+    logToScreen('✨ 데이터 공유가 활성화되었습니다.', 'success');
+
     currentUser = data.user;
     await loadAllData();
 }
 
 // 모든 데이터 로드
 async function loadAllData() {
-    console.log('📥 데이터 로딩 중...');
-    await Promise.all([
-        loadRoutinesFromSupabase(),
-        loadTodosFromSupabase(),
-        loadTrashFromSupabase()
-    ]);
-    console.log('✅ 데이터 로딩 완료');
+    logToScreen('📥 데이터 로딩 중...');
+    try {
+        await Promise.all([
+            loadRoutinesFromSupabase(),
+            loadTodosFromSupabase(),
+            loadTrashFromSupabase()
+        ]);
+        logToScreen('✅ 모든 초기 데이터 로드 완료', 'success');
+    } catch (e) {
+        logToScreen('❌ 데이터 로드 중 에러 발생: ' + e.message, 'error');
+    }
 }
 
 // ========================================
